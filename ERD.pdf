@@ -1,0 +1,5 @@
+Studios (1) —— (N) Movies
+
+Movies (N) —— (N) Actors (connected via the Roles table)
+
+Agents (1) —— (N) Actors

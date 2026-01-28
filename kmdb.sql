@@ -159,3 +159,94 @@
 -- Represented by agent
 -- ====================
 -- Christian Bale
+
+-- Drop existing tables
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS movies;
+DROP TABLE IF EXISTS actors;
+DROP TABLE IF EXISTS studios;
+DROP TABLE IF EXISTS agents;
+
+-- Create Tables based on the domain model
+CREATE TABLE studios (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT
+);
+
+CREATE TABLE movies (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT,
+  year_released INTEGER,
+  mpaa_rating TEXT,
+  studio_id INTEGER
+);
+
+CREATE TABLE actors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  agent_id INTEGER
+);
+
+CREATE TABLE agents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT
+);
+
+-- Bridge table to handle many-to-many relationship (Actor <-> Movie)
+CREATE TABLE roles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  movie_id INTEGER,
+  actor_id INTEGER,
+  character_name TEXT
+);
+
+-- Insert Initial Data
+INSERT INTO studios (name) VALUES ('Warner Bros.');
+
+INSERT INTO movies (title, year_released, mpaa_rating, studio_id) 
+VALUES ('Batman Begins', 2005, 'PG-13', 1),
+       ('The Dark Knight', 2008, 'PG-13', 1),
+       ('The Dark Knight Rises', 2012, 'PG-13', 1);
+
+INSERT INTO actors (name) 
+VALUES ('Christian Bale'), ('Michael Caine'), ('Liam Neeson'), ('Katie Holmes'), 
+       ('Gary Oldman'), ('Heath Ledger'), ('Aaron Eckhart'), ('Maggie Gyllenhaal'),
+       ('Tom Hardy'), ('Joseph Gordon-Levitt'), ('Anne Hathaway');
+
+INSERT INTO agents (name) VALUES ('The Professional');
+
+-- Requirement: Assign an agent to a single actor
+UPDATE actors SET agent_id = 1 WHERE name = 'Christian Bale';
+
+-- Insert Roles (Cast data)
+INSERT INTO roles (movie_id, actor_id, character_name) VALUES 
+(1, 1, 'Bruce Wayne'), (1, 2, 'Alfred'), (1, 3, "Ra's Al Ghul"), (1, 4, 'Rachel Dawes'), (1, 5, 'Commissioner Gordon'),
+(2, 1, 'Bruce Wayne'), (2, 6, 'Joker'), (2, 7, 'Harvey Dent'), (2, 2, 'Alfred'), (2, 8, 'Rachel Dawes'),
+(3, 1, 'Bruce Wayne'), (3, 5, 'Commissioner Gordon'), (3, 9, 'Bane'), (3, 10, 'John Blake'), (3, 11, 'Selina Kyle');
+
+-- The Reports
+.print "Movies"
+.print "======"
+.print ""
+SELECT movies.title, movies.year_released, movies.mpaa_rating, studios.name
+FROM movies
+JOIN studios ON movies.studio_id = studios.id;
+
+.print ""
+.print "Top Cast"
+.print "========"
+.print ""
+SELECT movies.title, actors.name, roles.character_name
+FROM roles
+JOIN movies ON roles.movie_id = movies.id
+JOIN actors ON roles.actor_id = actors.id
+ORDER BY movies.id;
+
+.print ""
+.print "Represented by agent"
+.print "===================="
+.print ""
+SELECT actors.name
+FROM actors
+JOIN agents ON actors.agent_id = agents.id
+WHERE agents.name = 'The Professional';
